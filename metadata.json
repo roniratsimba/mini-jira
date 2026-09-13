@@ -1,0 +1,6 @@
+{
+  "name": "Mini-Jira",
+  "description": "Mini-Jira — Gestionnaire de tâches collaboratif moderne full-stack React + Symfony 7 avec Kanban, tableaux de bord, invitations sécurisées et suivi du temps.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
