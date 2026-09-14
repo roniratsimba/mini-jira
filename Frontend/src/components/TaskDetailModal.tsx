@@ -13,9 +13,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   X,
-  Clock,
   Calendar,
-  User,
   AlertTriangle,
   Play,
   Square,
@@ -24,13 +22,13 @@ import {
   Trash2,
   GitCommit,
   History,
-  Shield,
   FileText,
 } from 'lucide-react';
 import { Tache, Membre, Priorite, Statut, SessionTravail, Projet } from '../types';
 import { taskService } from '../services/taskService';
 import { sessionTimerService, ActiveSession } from '../services/sessionTimerService';
 import { projectService } from '../services/projectService';
+import { symfonyApi } from '../services/symfonyApiClient';
 
 interface TaskDetailModalProps {
   /** Identifiant de la tâche ouverte (null si fermé) */
@@ -69,31 +67,61 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
   const [tache, setTache] = useState<Tache | null>(null);
   const [project, setProject] = useState<Projet | null>(null);
   const [projectMembers, setProjectMembers] = useState<any[]>([]);
-
-  useEffect(() => {
-    taskService.getTaskById(taskId).then(setTache);
-    if (tache) {
-      projectService.getProjectById(tache.projetId).then(setProject);
-    }
-  }, [taskId]);
-
-  if (!tache) return null;
+  const [sessions, setSessions] = useState<SessionTravail[]>([]);
 
   const [activeTab, setActiveTab] = useState<'details' | 'sessions' | 'commit'>('details');
-  const [titre, setTitre] = useState(tache.titre);
-  const [description, setDescription] = useState(tache.description || '');
-  const [priorite, setPriorite] = useState<Priorite>(tache.priorite);
-  const [statut, setStatut] = useState<Statut>(tache.statut);
-  const [membreAssigneId, setMembreAssigneId] = useState<number | null>(tache.membreAssigneId);
-  const [dateEcheance, setDateEcheance] = useState<string>(tache.dateEcheance || '');
-  const [tempsEstime, setTempsEstime] = useState<number>(tache.tempsEstime || 0);
+  const [titre, setTitre] = useState('');
+  const [description, setDescription] = useState('');
+  const [priorite, setPriorite] = useState<Priorite>('MOYENNE');
+  const [statut, setStatut] = useState<Statut>('A_FAIRE');
+  const [membreAssigneId, setMembreAssigneId] = useState<number | null>(null);
+  const [dateEcheance, setDateEcheance] = useState<string>('');
+  const [tempsEstime, setTempsEstime] = useState<number>(0);
 
   // Commit generator state
   const [commitType, setCommitType] = useState<'feat' | 'fix' | 'refactor' | 'docs' | 'chore'>('feat');
   const [copiedCommit, setCopiedCommit] = useState(false);
 
-  // Sessions list
-  const sessions: SessionTravail[] = db.getSessionsForTache(taskId);
+  useEffect(() => {
+    let isMounted = true;
+    taskService.getTaskById(taskId).then((t) => {
+      if (!isMounted) return;
+      setTache(t);
+      setTitre(t.titre);
+      setDescription(t.description || '');
+      setPriorite(t.priorite);
+      setStatut(t.statut);
+      setMembreAssigneId(t.membreAssigneId);
+      setDateEcheance(t.dateEcheance || '');
+      setTempsEstime(t.tempsEstime || 0);
+
+      projectService.getProjectById(t.projetId).then((p) => {
+        if (isMounted) setProject(p);
+      }).catch(() => {});
+
+      symfonyApi.getProjectDetail(t.projetId).then((detail) => {
+        if (isMounted && detail?.affectations) {
+          setProjectMembers(detail.affectations);
+        }
+      }).catch(() => {});
+    }).catch(() => {});
+
+    // Charger les sessions via l'API Symfony si endpoint disponible
+    symfonyApi.request<any[]>(`/tasks/${taskId}/sessions`).then((sList) => {
+      if (isMounted && Array.isArray(sList)) {
+        setSessions(sList);
+      }
+    }).catch(() => {
+      if (isMounted) setSessions([]);
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [taskId]);
+
+  if (!tache) return null;
+
   const isThisSessionActive = activeSession?.tacheId === taskId;
   const isOvertime = taskService.isOvertime(tache);
   const isOverdue = taskService.isOverdue(tache);
@@ -305,11 +333,15 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                     className="w-full text-xs font-medium px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 outline-hidden focus:border-indigo-500"
                   >
                     <option value="">-- Non assigné --</option>
-                    {projectMembers.map(({ membre, affectation }) => (
-                      <option key={membre.id} value={membre.id}>
-                        {membre.nom} ({affectation.role})
-                      </option>
-                    ))}
+                    {projectMembers.map((item: any) => {
+                      const m = item.membre || item.user || item;
+                      const role = item.role || item.affectation?.role || 'MEMBRE';
+                      return (
+                        <option key={m.id} value={m.id}>
+                          {m.nom || m.email} ({role})
+                        </option>
+                      );
+                    })}
                   </select>
                 </div>
 
@@ -363,7 +395,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                 <div>
                   <h4 className="text-sm font-bold text-slate-900">Historique des sessions de travail</h4>
                   <p className="text-xs text-slate-500">
-                    Enregistrements conformes à l'entité SessionTravail (V2).
+                    Enregistrements de chronométrage associés à cette tâche.
                   </p>
                 </div>
 
@@ -387,40 +419,29 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                 </div>
               ) : (
                 <div className="divide-y divide-slate-100 border border-slate-200 rounded-xl overflow-hidden">
-                  {sessions.map((s) => {
-                    const sessionMember = db.getMembreById(s.membreId);
-                    return (
-                      <div
-                        key={s.id}
-                        className="p-3 bg-white flex items-center justify-between text-xs"
-                      >
-                        <div className="flex items-center gap-2.5">
-                          <img
-                            src={
-                              sessionMember?.avatarUrl ||
-                              `https://api.dicebear.com/7.x/initials/svg?seed=${sessionMember?.nom || 'User'}`
-                            }
-                            alt=""
-                            className="w-5 h-5 rounded-full object-cover"
-                          />
-                          <div>
-                            <span className="font-semibold text-slate-800">
-                              {sessionMember?.nom || 'Membre'}
-                            </span>
-                            <div className="text-[10px] text-slate-400">
-                              Début : {new Date(s.dateDebut).toLocaleString('fr-FR')}
-                            </div>
+                  {sessions.map((s: any) => (
+                    <div
+                      key={s.id}
+                      className="p-3 bg-white flex items-center justify-between text-xs"
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <div>
+                          <span className="font-semibold text-slate-800">
+                            Membre #{s.membreId || s.user?.id || 'Inconnu'}
+                          </span>
+                          <div className="text-[10px] text-slate-400">
+                            Début : {new Date(s.dateDebut).toLocaleString('fr-FR')}
                           </div>
                         </div>
-
-                        <div className="text-right">
-                          <span className="font-mono font-bold text-slate-800">
-                            +{s.dureeMinutes || 0} min
-                          </span>
-                        </div>
                       </div>
-                    );
-                  })}
+
+                      <div className="text-right">
+                        <span className="font-mono font-bold text-slate-800">
+                          +{s.dureeMinutes || 0} min
+                        </span>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               )}
             </div>

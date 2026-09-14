@@ -1,19 +1,14 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Bell,
-  Clock,
   Square,
   ChevronRight,
   FolderKanban,
-  Sparkles,
-  Shield,
-  Layers,
   Menu,
-  Settings,
 } from 'lucide-react';
-import { Membre, Projet } from '../types';
+import { Membre, Projet, Tache } from '../types';
 import { ActiveSession, sessionTimerService } from '../services/sessionTimerService';
-import { db } from '../services/mockDatabase';
+import { taskService } from '../services/taskService';
 import { UserAvatar } from './UserAvatar';
 
 interface HeaderProps {
@@ -47,7 +42,23 @@ export const Header: React.FC<HeaderProps> = ({
   onToggleMobileSidebar,
   onOpenProfileSettings,
 }) => {
-  const activeTask = activeSession ? db.getTacheById(activeSession.tacheId) : null;
+  const [activeTask, setActiveTask] = useState<Tache | null>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+    if (activeSession?.tacheId) {
+      taskService.getTaskById(activeSession.tacheId).then((task) => {
+        if (isMounted) setActiveTask(task);
+      }).catch(() => {
+        if (isMounted) setActiveTask(null);
+      });
+    } else {
+      setActiveTask(null);
+    }
+    return () => {
+      isMounted = false;
+    };
+  }, [activeSession?.tacheId]);
 
   return (
     <header className="h-14 bg-white border-b border-slate-200/80 px-4 sm:px-6 flex items-center justify-between shrink-0 z-10">
@@ -126,7 +137,7 @@ export const Header: React.FC<HeaderProps> = ({
 
       {/* Right controls: Live Stopwatch & Notifications */}
       <div className="flex items-center gap-3">
-        {/* Active Timer Pill (V2 Chronomètre métier) */}
+        {/* Active Timer Pill */}
         {activeSession && activeTask && (
           <div className="flex items-center gap-2 px-3 py-1.5 bg-rose-50 border border-rose-200/80 rounded-full shadow-xs animate-in fade-in duration-200">
             <span className="relative flex h-2 w-2">

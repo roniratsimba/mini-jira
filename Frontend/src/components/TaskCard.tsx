@@ -2,8 +2,6 @@ import React from 'react';
 import { Clock, Calendar, AlertCircle, Play, Square, User } from 'lucide-react';
 import { Tache, Membre } from '../types';
 import { taskService } from '../services/taskService';
-import { sessionTimerService } from '../services/sessionTimerService';
-import { db } from '../services/mockDatabase';
 
 interface TaskCardProps {
   tache: Tache;
@@ -22,7 +20,6 @@ export const TaskCard: React.FC<TaskCardProps> = ({
   isSessionActive,
   currentUser,
 }) => {
-  const assignee = tache.membreAssigneId ? db.getMembreById(tache.membreAssigneId) : null;
   const isOverdue = taskService.isOverdue(tache);
   const isOvertime = taskService.isOvertime(tache);
 
@@ -121,14 +118,9 @@ export const TaskCard: React.FC<TaskCardProps> = ({
       {/* Footer: Assignee & Quick Timer trigger */}
       <div className="pt-2 border-t border-slate-100 flex items-center justify-between">
         {/* Assignee info */}
-        {assignee ? (
+        {tache.membreAssigneId ? (
           <div className="flex items-center gap-1.5 text-xs text-slate-700">
-            <img
-              src={assignee.avatarUrl || `https://api.dicebear.com/7.x/initials/svg?seed=${assignee.nom}`}
-              alt={assignee.nom}
-              className="w-5 h-5 rounded-full object-cover border border-slate-200"
-            />
-            <span className="text-xs font-medium max-w-[100px] truncate">{assignee.nom}</span>
+            <span className="text-xs font-medium max-w-[100px] truncate">Membre #{tache.membreAssigneId}</span>
           </div>
         ) : (
           <div className="flex items-center gap-1 text-xs text-slate-400 italic">

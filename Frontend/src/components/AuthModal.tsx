@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { FolderKanban, Lock, Mail, User, AlertCircle, ArrowRight, Check, X } from 'lucide-react';
+import { FolderKanban, Lock, Mail, User, AlertCircle, ArrowRight, X } from 'lucide-react';
 import { authService } from '../services/authService';
-import { db } from '../services/mockDatabase';
 
 interface AuthModalProps {
   onSuccess: () => void;
@@ -28,22 +27,22 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onSuccess, onClose, initia
 
   const [error, setError] = useState<string | null>(null);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     try {
-      authService.login(email, password);
+      await authService.login(email, password);
       onSuccess();
     } catch (err: any) {
       setError(err.message || 'Identifiants invalides');
     }
   };
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     try {
-      authService.register(regNom, regEmail, regPassword, regConfirm);
+      await authService.register(regNom, regEmail, regPassword, regConfirm);
       onSuccess();
     } catch (err: any) {
       setError(err.message || 'Erreur lors de l’inscription');

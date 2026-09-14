@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   FolderKanban,
   CheckSquare,
@@ -10,7 +10,7 @@ import {
   X,
 } from 'lucide-react';
 import { Membre, Projet } from '../types';
-import { db } from '../services/mockDatabase';
+import { projectService } from '../services/projectService';
 import { UserAvatar } from './UserAvatar';
 
 interface SidebarProps {
@@ -39,7 +39,22 @@ export const Sidebar: React.FC<SidebarProps> = ({
   isMobileOpen = false,
   onCloseMobile,
 }) => {
-  const myProjects = db.getProjetsForMembre(currentUser.id);
+  const [projectCount, setProjectCount] = useState<number>(0);
+
+  useEffect(() => {
+    let isMounted = true;
+    projectService.getProjectsForUser().then((projects) => {
+      if (isMounted) {
+        setProjectCount(projects.length);
+      }
+    }).catch(() => {
+      if (isMounted) setProjectCount(0);
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [currentUser.id]);
 
   return (
     <>
@@ -138,7 +153,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <span>Mes Projets</span>
             </div>
             <span className="text-xs px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-600 font-semibold">
-              {myProjects.length}
+              {projectCount}
             </span>
           </button>
 

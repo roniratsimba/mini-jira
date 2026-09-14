@@ -1,20 +1,16 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
-  CheckCircle2,
   Clock,
   AlertCircle,
   TrendingUp,
   Plus,
   ArrowUpRight,
-  User,
-  Calendar,
   Layers,
   ArrowRight,
 } from 'lucide-react';
 import { Projet, Tache, Membre } from '../types';
-import { projectService } from '../services/projectService';
+import { projectService, ProjectDetailedStats } from '../services/projectService';
 import { taskService } from '../services/taskService';
-import { db } from '../services/mockDatabase';
 
 interface ProjectDashboardProps {
   projet: Projet;
@@ -31,8 +27,33 @@ export const ProjectDashboard: React.FC<ProjectDashboardProps> = ({
   onOpenTaskDetail,
   onOpenCreateTask,
 }) => {
-  const stats = projectService.getProjectDetailedStats(projet.id);
-  const taches = taskService.getTasksForProject(projet.id);
+  const [stats, setStats] = useState<ProjectDetailedStats>({
+    total: 0,
+    aFaire: 0,
+    enCours: 0,
+    termine: 0,
+    avancementPct: 0,
+    tachesEnRetard: 0,
+    tempsEstimeTotal: 0,
+    tempsReelTotal: 0,
+    isOvertime: false,
+  });
+  const [taches, setTaches] = useState<Tache[]>([]);
+
+  useEffect(() => {
+    let isMounted = true;
+    projectService.getProjectDetailedStats(projet.id).then((res) => {
+      if (isMounted) setStats(res);
+    }).catch(() => {});
+
+    taskService.getTasksForProject(projet.id).then((res) => {
+      if (isMounted) setTaches(res);
+    }).catch(() => {});
+
+    return () => {
+      isMounted = false;
+    };
+  }, [projet.id]);
 
   // Recent / High priority tasks
   const priorityTasks = [...taches].sort((a, b) => {
@@ -83,7 +104,7 @@ export const ProjectDashboard: React.FC<ProjectDashboardProps> = ({
         </div>
       </div>
 
-      {/* Primary KPI Metrics Cards (Clicking a card filters the Kanban as requested in specs!) */}
+      {/* Primary KPI Metrics Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Total Tasks */}
         <div
@@ -160,7 +181,7 @@ export const ProjectDashboard: React.FC<ProjectDashboardProps> = ({
           </div>
         </div>
 
-        {/* Temps Estimé vs Réel (V2 Métrique) */}
+        {/* Temps Estimé vs Réel */}
         <div
           className={`p-5 rounded-xl border ${
             stats.isOvertime ? 'bg-amber-50/50 border-amber-200' : 'bg-white border-slate-200/80'
@@ -297,7 +318,6 @@ export const ProjectDashboard: React.FC<ProjectDashboardProps> = ({
         ) : (
           <div className="divide-y divide-slate-100">
             {priorityTasks.map((t) => {
-              const assignee = t.membreAssigneId ? db.getMembreById(t.membreAssigneId) : null;
               const isOverdue = taskService.isOverdue(t);
 
               return (
@@ -341,15 +361,10 @@ export const ProjectDashboard: React.FC<ProjectDashboardProps> = ({
                   </div>
 
                   <div className="flex items-center gap-4 shrink-0">
-                    {assignee ? (
-                      <div className="flex items-center gap-1.5 text-xs text-slate-600">
-                        <img
-                          src={assignee.avatarUrl || `https://api.dicebear.com/7.x/initials/svg?seed=${assignee.nom}`}
-                          alt={assignee.nom}
-                          className="w-5 h-5 rounded-full object-cover"
-                        />
-                        <span className="hidden sm:inline font-medium">{assignee.nom}</span>
-                      </div>
+                    {t.membreAssigneId ? (
+                      <span className="text-xs font-medium text-slate-600">
+                        Membre #{t.membreAssigneId}
+                      </span>
                     ) : (
                       <span className="text-xs text-slate-400 italic">Non assigné</span>
                     )}
