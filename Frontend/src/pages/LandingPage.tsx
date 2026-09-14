@@ -65,7 +65,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             <div className="flex items-center gap-1.5">
               <span className="font-semibold text-slate-900 tracking-tight text-lg">Mini-Jira</span>
               <span className="text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded bg-indigo-50 text-[#5E6AD2] border border-indigo-100 hidden sm:inline-block">
-                Web + Desktop
+                Web et Desktop en cours
               </span>
             </div>
           </div>
@@ -202,7 +202,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         {/* Badge discret */}
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-slate-200/90 shadow-2xs text-xs font-medium text-slate-700 mb-6 hover:border-slate-300 transition-colors">
           <span className="w-2 h-2 rounded-full bg-[#5E6AD2] animate-pulse" />
-          <span>Web + Desktop · Disponible partout</span>
+          <span>Web + Desktop (en cours) · Disponible partout</span>
           <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
         </div>
 
@@ -389,38 +389,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ========================================================================= */}
-      {/* 3. SOCIAL PROOF / LOGO BAR                                               */}
-      {/* ========================================================================= */}
-      <section className="py-12 border-y border-slate-200/70 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <p className="text-xs uppercase font-semibold text-slate-400 tracking-wider mb-6">
-            Utilisé par des équipes qui construisent de vrais produits
-          </p>
-
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-6 items-center justify-center opacity-70">
-            <div className="flex items-center justify-center gap-1.5 font-bold text-sm tracking-tight text-slate-700">
-              <span className="w-2.5 h-2.5 rounded-sm bg-slate-800" /> PULSE TECH
-            </div>
-            <div className="flex items-center justify-center gap-1.5 font-bold text-sm tracking-tight text-slate-700">
-              <span className="w-2.5 h-2.5 rounded-full bg-slate-800" /> KERNEL.IO
-            </div>
-            <div className="flex items-center justify-center gap-1.5 font-bold text-sm tracking-tight text-slate-700">
-              <span className="w-2.5 h-2.5 rounded-xs bg-[#5E6AD2]" /> STRATA LABS
-            </div>
-            <div className="flex items-center justify-center gap-1.5 font-bold text-sm tracking-tight text-slate-700">
-              <span className="w-2.5 h-2.5 rotate-45 bg-slate-800" /> NOVASCALE
-            </div>
-            <div className="flex items-center justify-center gap-1.5 font-bold text-sm tracking-tight text-slate-700">
-              <span className="w-2.5 h-2.5 rounded-full border border-slate-800" /> VECTORPAY
-            </div>
-            <div className="flex items-center justify-center gap-1.5 font-bold text-sm tracking-tight text-slate-700">
-              <span className="w-2.5 h-2.5 rounded-sm bg-indigo-600" /> CLOUDSTACK
             </div>
           </div>
         </div>
@@ -813,96 +781,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 </div>
               </div>
             )}
-          </div>
-        </div>
-      </section>
-
-      {/* ========================================================================= */}
-      {/* 7. TÉMOIGNAGES                                                            */}
-      {/* ========================================================================= */}
-      <section className="py-20 bg-white border-y border-slate-200/70">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-3xl mx-auto mb-16">
-            <div className="text-xs font-bold uppercase tracking-wider text-[#5E6AD2] mb-2">
-              Retours d'expérience
-            </div>
-            <h2 className="text-2xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
-              Ce que disent les développeurs
-            </h2>
-            <p className="mt-3 text-base text-slate-600">
-              Adopté par ceux qui construisent des logiciels exigeants au quotidien.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {/* Testimonial 1 */}
-            <div className="p-6 rounded-xl bg-[#F7F8F8] border border-slate-200 flex flex-col justify-between">
-              <div className="space-y-4">
-                <div className="flex text-amber-400">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-4 h-4 fill-current" />
-                  ))}
-                </div>
-                <p className="text-xs text-slate-700 leading-relaxed italic">
-                  « La réactivité du Kanban et le chronomètre de session intégré nous font gagner au moins 2 heures par développeur chaque semaine. On a abandonné les usines à gaz. »
-                </p>
-              </div>
-              <div className="mt-6 pt-4 border-t border-slate-200/70 flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-indigo-600 text-white font-bold text-xs flex items-center justify-center">
-                  ML
-                </div>
-                <div>
-                  <div className="text-xs font-bold text-slate-900">Marc Lefèvre</div>
-                  <div className="text-[11px] text-slate-500">Lead Dev · Kernel.io</div>
-                </div>
-              </div>
-            </div>
-
-            {/* Testimonial 2 */}
-            <div className="p-6 rounded-xl bg-[#F7F8F8] border border-slate-200 flex flex-col justify-between">
-              <div className="space-y-4">
-                <div className="flex text-amber-400">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-4 h-4 fill-current" />
-                  ))}
-                </div>
-                <p className="text-xs text-slate-700 leading-relaxed italic">
-                  « Avoir une vraie version Desktop autonome avec sa base SQLite locale en plus de l'application web, c'est exactement ce qu'on cherchait pour travailler hors-ligne en train. »
-                </p>
-              </div>
-              <div className="mt-6 pt-4 border-t border-slate-200/70 flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-emerald-600 text-white font-bold text-xs flex items-center justify-center">
-                  SB
-                </div>
-                <div>
-                  <div className="text-xs font-bold text-slate-900">Sophie Benali</div>
-                  <div className="text-[11px] text-slate-500">CTO · Strata Labs</div>
-                </div>
-              </div>
-            </div>
-
-            {/* Testimonial 3 */}
-            <div className="p-6 rounded-xl bg-[#F7F8F8] border border-slate-200 flex flex-col justify-between">
-              <div className="space-y-4">
-                <div className="flex text-amber-400">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-4 h-4 fill-current" />
-                  ))}
-                </div>
-                <p className="text-xs text-slate-700 leading-relaxed italic">
-                  « Le système d'invitations par code et le respect strict du RBAC rendent la collaboration avec nos clients et freelances extrêmement sereine et étanche. »
-                </p>
-              </div>
-              <div className="mt-6 pt-4 border-t border-slate-200/70 flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-purple-600 text-white font-bold text-xs flex items-center justify-center">
-                  TR
-                </div>
-                <div>
-                  <div className="text-xs font-bold text-slate-900">Thomas Roussel</div>
-                  <div className="text-[11px] text-slate-500">Senior Software Architect</div>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       </section>
