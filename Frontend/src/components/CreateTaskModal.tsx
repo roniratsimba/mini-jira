@@ -41,7 +41,7 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
     });
   }, [projet.id, currentUser.id]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
 
@@ -51,15 +51,13 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
     }
 
     try {
-      const created = taskService.createTask({
-        projetId: projet.id,
+      const created = await taskService.createTask(projet.id, {
         titre: titre.trim(),
         description: description.trim(),
         priorite,
         statut,
-        dateEcheance: dateEcheance || null,
         tempsEstime: Number(tempsEstime) || 0,
-        membreAssigneId: membreAssigneId || null,
+        assigneIds: membreAssigneId ? [membreAssigneId] : [],
       });
 
       onTaskCreated(created);

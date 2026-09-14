@@ -1,6 +1,6 @@
 # 🚀 Mini-Jira — Gestionnaire de Tâches Collaboratif Agile
 
-> Application web moderne de gestion de projets et de tâches inspirée des méthodologies Agiles / Scrum et de l'ergonomie d'outils modernes (Jira, Linear). Conçue et développée conformément aux spécifications du cahier des charges et à la note d'implémentation.
+> Application web moderne de gestion de projets et de tâches inspirée des méthodologies Agiles / Scrum et de l'ergonomie d'outils modernes (Jira, Linear). Architecture React + Symfony 7.
 
 ---
 
@@ -18,12 +18,12 @@
 
 ## 🎯 Vue d'ensemble & Contexte
 
-**Mini-Jira** est un outil de productivité logicielle permettant aux équipes de concevoir, planifier, suivre et chronométrer l'avancement de leurs développements au travers de tableaux Kanban interactifs, de tableaux de bord analytiques et d'un assistant intelligent de découpage de sprint propulsé par l'IA.
+**Mini-Jira** est un outil de productivité logicielle permettant aux équipes de concevoir, planifier, suivre et chronométrer l'avancement de leurs développements au travers de tableaux Kanban interactifs et de tableaux de bord analytiques.
 
-Le projet répond de manière stricte aux trois phases d'exigences :
-- **Version 1 (Fondations métier) :** Authentification, gestion multi-projets avec contrôle d'accès basé sur les rôles (RBAC : ADMIN / MEMBRE), tableau Kanban (À faire, En cours, Terminé) avec Glisser-Déposer (Drag & Drop), filtres de recherche et génération automatique de messages de commits conventionnels (`feat(MJ-101): ...`).
-- **Version 2 (Productivité & Analytics) :** Chronométrage des temps de travail en direct avec persistance temporelle, calcul automatique des dépassements (`tempsReel > tempsEstime`), tableau de bord individuel ("Mes Tâches", temps passé, alertes), tableau de bord projet (taux d'avancement %, burndown/statistiques, décompte des membres), et système d'invitation sécurisé avec codes à jeton unique (`MJ-XXXX-YYYY`).
-- **Version 3 (Intégration IA & Documentation) :** Assistant de découpage de sprint connecté au modèle Gemini (`gemini-3.8-flash`) avec fallback heuristique défensif, centre de notifications en direct avec badges, et livrables techniques intégrés (Script SQL DDL PostgreSQL et Diagramme de classes UML Mermaid).
+Le projet est construit selon une **architecture React + Symfony 7** complètement séparée :
+- **Frontend** : Application React 19 avec TypeScript et Vite
+- **Backend** : API REST Symfony 7 avec PostgreSQL 16
+- **Communication** : API REST avec authentification JWT
 
 ---
 
@@ -55,12 +55,6 @@ Le projet répond de manière stricte aux trois phases d'exigences :
 ### 📊 Tableaux de Bord Analytiques
 - **Dashboard Projet :** Métriques d'avancement global en pourcentage, répartition des tâches par statut, comparaison visuelle temps estimé vs temps réel, liste des tâches en retard critique, et listing des membres affectés.
 - **Dashboard Individuel :** Vue d'ensemble du collaborateur avec ses tâches en cours, ses priorités du jour, son volume d'heures travaillées et ses statistiques de réalisation.
-
-### 🤖 Assistant Sprint Planner IA (Gemini)
-- Découpage automatisé d'un objectif de sprint en 4 à 6 tâches techniques actionnables.
-- Intégration via backend Express sécurisé appelant le modèle `gemini-3.8-flash`.
-- Formatage JSON strict avec titre, description technique, priorité et temps estimé.
-- Mécanisme de fallback heuristique sans interruption si aucune clé d'API n'est configurée.
 
 ### 🔔 Centre de Notifications en Direct
 - Notification lors de l'assignation d'une tâche, du changement de statut, de la réception d'une invitation, ou d'un dépassement de temps de travail.
@@ -119,13 +113,15 @@ Le schéma est composé de 7 tables normalisées avec contraintes de clés étra
 | Domaine | Technologie | Rôle & Justification |
 | :--- | :--- | :--- |
 | **Framework UI** | **React 19** | Rendu déclaratif, virtual DOM haute performance, hooks personnalisés. |
-| **Langage** | **TypeScript 5.8** | Typage statique strict garantissant la cohérence des modèles de données. |
+| **Langage Frontend** | **TypeScript 5.8** | Typage statique strict garantissant la cohérence des modèles de données. |
 | **Build & Bundler** | **Vite 6** | Démarrage instantané du serveur de développement et compilation optimisée. |
 | **Styling** | **Tailwind CSS v4** | Utilisation de classes utilitaires modernes pour un design soigné sans surcharge CSS. |
 | **Animations** | **Motion (`motion/react`)** | Micro-interactions fluides pour les modales, transitions de cartes et tiroirs. |
 | **Icônes** | **Lucide React** | Bibliothèque d'icônes vectorielles cohérente, légère et accessible. |
-| **Backend API** | **Express 4 & Node.js** | Passerelle d'API pour masquer les clés d'API tierces et servir le client. |
-| **Intelligence Artificielle**| **@google/genai & Gemini** | Découpage de backlog Agile avec génération de JSON typé strict. |
+| **Backend Framework** | **Symfony 7.1** | Framework PHP moderne avec architecture MVC et composants réutilisables. |
+| **Backend Langage** | **PHP 8.2+** | Version PHP avec support des types stricts et performances améliorées. |
+| **ORM & Base de données** | **Doctrine ORM 3 & PostgreSQL 16** | ORM puissant pour la gestion des entités et base de données relationnelle robuste. |
+| **Authentification** | **LexikJWTAuthenticationBundle** | Authentification JWT stateless avec clés RSA 4096 bits. |
 
 *Une analyse approfondie de chaque technologie et des patterns d'architecture est disponible dans le fichier [`DOCUMENTATION_TECHNIQUE.md`](./DOCUMENTATION_TECHNIQUE.md).*
 
@@ -136,6 +132,9 @@ Le schéma est composé de 7 tables normalisées avec contraintes de clés étra
 ### Prérequis
 - **Node.js** (version 18 ou supérieure recommandée)
 - **npm** (ou yarn / pnpm)
+- **PHP 8.2 ou supérieure**
+- **Composer**
+- **PostgreSQL 16**
 
 ### Étapes d'installation
 
@@ -150,34 +149,72 @@ Le schéma est composé de 7 tables normalisées avec contraintes de clés étra
    npm install
    ```
 
-3. **Configurer les variables d'environnement (optionnel) :**
-   Si vous souhaitez utiliser l'IA Gemini avec votre propre clé, créez un fichier `.env` dans le dossier Frontend :
+3. **Installation du Backend (Symfony) :**
+   ```bash
+   cd Backend/symfony-backend
+   composer install
+   ```
+
+4. **Configuration de la base de données PostgreSQL :**
+   Créez une base de données PostgreSQL :
+   ```sql
+   CREATE DATABASE minijira;
+   CREATE USER minijira_user WITH PASSWORD 'your_password';
+   GRANT ALL PRIVILEGES ON DATABASE minijira TO minijira_user;
+   ```
+
+5. **Configurer les variables d'environnement Backend :**
+   Modifiez le fichier `.env` dans `Backend/symfony-backend/` :
    ```env
-   GEMINI_API_KEY="votre_cle_api_gemini_ici"
+   DATABASE_URL="postgresql://minijira_user:your_password@127.0.0.1:5432/minijira?serverVersion=16&charset=utf8"
+   APP_ENV=dev
+   APP_SECRET=your_secret_key_here
    ```
-   *(Remarque : Si aucune clé n'est fournie, l'application bascule automatiquement sur un moteur heuristique intelligent afin de garantir un fonctionnement à 100 % hors-ligne).*
 
-4. **Lancer le serveur de développement Frontend :**
+6. **Appliquer les migrations de base de données :**
    ```bash
-   cd Frontend
-   npm run dev
+   cd Backend/symfony-backend
+   php bin/console doctrine:migrations:migrate --no-interaction
    ```
-   L'application est immédiatement accessible à l'adresse : **`http://localhost:3000`**.
 
-5. **Compiler pour la production :**
+7. **Charger les fixtures (données de test) :**
    ```bash
-   cd Frontend
-   npm run build
+   php bin/console doctrine:fixtures:load --no-interaction
    ```
+
+8. **Générer les clés JWT :**
+   ```bash
+   php bin/console lexik:jwt:generate-keypair
+   ```
+
+9. **Lancer le serveur Backend Symfony :**
+   ```bash
+   cd Backend/symfony-backend
+   php -S localhost:8000 -t public
+   ```
+
+10. **Lancer le serveur Frontend React :**
+    ```bash
+    cd Frontend
+    npm run dev
+    ```
+    L'application est accessible à l'adresse : **`http://localhost:3000`**.
+
+11. **Compiler pour la production :**
+    ```bash
+    cd Frontend
+    npm run build
+    ```
 
 ---
 
 ## 📖 Guide d'Utilisation
 
-### 1. Démarrage rapide (Mode Démo)
-À l'ouverture de l'application, vous êtes connecté par défaut sous l'identité d'**Alice Martin** (Administratrice sur le projet démo *Refonte Plateforme SaaS*).
-- Vous pouvez changer d'utilisateur à tout moment en cliquant sur le sélecteur d'utilisateur en haut à droite.
-- Vous pouvez tester la connexion / déconnexion / inscription via le bouton de profil.
+### 1. Première connexion
+- Lancez le backend Symfony sur `http://localhost:8000`
+- Lancez le frontend React sur `http://localhost:3000`
+- Inscrivez-vous avec un nouveau compte ou utilisez les fixtures de test
+- Les données sont persistées dans PostgreSQL via le backend Symfony
 
 ### 2. Gestion des Tâches & Kanban
 - **Créer une tâche :** Cliquez sur le bouton bleu `+ Nouvelle tâche` depuis l'en-tête ou dans la colonne du Kanban. Renseignez le titre, la description, la priorité, l'échéance et le temps estimé.
@@ -194,76 +231,18 @@ Le schéma est composé de 7 tables normalisées avec contraintes de clés étra
 - Générez un code d'invitation (ex: `MJ-7K9A-3F12`).
 - Copiez ce code et utilisez le bouton `Rejoindre un projet` sur un autre compte pour intégrer automatiquement l'équipe en tant que `MEMBRE`.
 
-### 5. Sprint Planner IA
-- Cliquez sur l'onglet `Sprint Planner IA`.
-- Saisissez l'objectif de votre prochain sprint (ex: *"Intégrer le système de paiement Stripe et gérer les factures PDF"*).
-- Cliquez sur `Générer le découpage du Sprint`. Les tâches générées peuvent être ajoutées au Kanban en un seul clic !
-
 ---
 
-## 🐘 Backend API RESTful Symfony 7 & PostgreSQL
+## 🐘 Backend Symfony 7 & PostgreSQL
 
-En plus de l'application web React interactive, Mini-Jira inclut un backend d'entreprise complet sous **Symfony 7** (situé dans `/Backend/symfony-backend`) avec **Doctrine ORM 3**, **LexikJWTAuthenticationBundle** et **PostgreSQL 16**.
+Le backend Symfony 7 assure la persistance des données et l'authentification via une API REST complète.
 
-### 🚀 Installation (sans Docker)
-
-#### Prérequis
-- PHP 8.2 ou supérieur
-- Composer
-- PostgreSQL 16
-- Extensions PHP : pdo_pgsql, intl, json, ctype, openssl
-
-#### Étapes d'installation
-
-1. **Installer les dépendances PHP :**
-   ```bash
-   cd Backend/symfony-backend
-   composer install
-   ```
-
-2. **Configurer PostgreSQL :**
-   Créez une base de données PostgreSQL :
-   ```sql
-   CREATE DATABASE minijira;
-   CREATE USER minijira_user WITH PASSWORD 'your_password';
-   GRANT ALL PRIVILEGES ON DATABASE minijira TO minijira_user;
-   ```
-
-3. **Configurer les variables d'environnement :**
-   Modifiez le fichier `.env` dans `Backend/symfony-backend/` :
-   ```env
-   DATABASE_URL="postgresql://minijira_user:your_password@127.0.0.1:5432/minijira?serverVersion=16&charset=utf8"
-   APP_ENV=dev
-   APP_SECRET=your_secret_key_here
-   ```
-
-4. **Appliquer les migrations :**
-   ```bash
-   php bin/console doctrine:migrations:migrate --no-interaction
-   ```
-
-5. **Charger les fixtures (données de test) :**
-   ```bash
-   php bin/console doctrine:fixtures:load --no-interaction
-   ```
-
-6. **Générer les clés JWT :**
-   ```bash
-   php bin/console lexik:jwt:generate-keypair
-   ```
-
-7. **Démarrer le serveur :**
-   ```bash
-   php bin/console server:run
-   ```
-
-#### Points d'accès
-- **API Symfony** : `http://localhost:8000`
-- **PostgreSQL** : `localhost:5432`
-
-### 🐳 Alternative avec Docker (optionnel)
-
-Si vous préférez utiliser Docker, les instructions sont disponibles dans le fichier `docker-compose.yml` du dossier Backend.
+### 🧩 Spécifications Techniques Symfony 7
+- **Framework & Version :** Symfony 7.1 avec PHP 8.2+.
+- **Sécurité & Authentification :** JWT Bearer tokens stateless (`LexikJWTAuthenticationBundle`) avec clés RSA 4096 bits.
+- **Contrôle d'Accès RBAC :** Symfony Security Voters (`ProjectVoter`) pour valider les droits `ADMIN` vs `MEMBRE`.
+- **CORS :** `NelmioCorsBundle` préconfiguré pour autoriser le client React sur n'importe quel port.
+- **ORM & BDD :** Doctrine ORM 3 avec PostgreSQL 16 (Entités `User`, `Project`, `ProjectAssignment`, `Task`, `WorkSession`, `Notification`).
 
 ### 🧩 Spécifications Techniques Symfony 7
 - **Framework & Version :** Symfony 7.1 avec PHP 8.2+.

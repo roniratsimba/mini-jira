@@ -18,13 +18,7 @@ npm install
 
 ## ⚙️ Configuration
 
-Les variables d'environnement doivent être configurées dans un fichier `.env` :
-
-```env
-GEMINI_API_KEY="votre_cle_api_gemini_ici"
-```
-
-Si aucune clé n'est fournie, l'application utilisera un moteur heuristique intelligent pour le Sprint Planner IA.
+L'URL de l'API Symfony est configurée par défaut sur `http://localhost:8000/api`.
 
 ## 📦 Technologies
 
@@ -33,12 +27,11 @@ Si aucune clé n'est fournie, l'application utilisera un moteur heuristique inte
 - Vite 6
 - Tailwind CSS v4
 - Express 4
-- @google/genai (Gemini)
 - Lucide React
 - Motion
 
 ## 🔗 Backend API
 
-Le frontend communique avec le backend Symfony 7 situé dans `../Backend/symfony-backend` via des endpoints REST API.
+Le frontend communique avec le backend Symfony 7 situé dans `../Backend/symfony-backend` via des endpoints REST API avec authentification JWT.
 
 L'application sera accessible sur `http://localhost:3000` lors du développement.

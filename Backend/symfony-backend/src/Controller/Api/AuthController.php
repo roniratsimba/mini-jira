@@ -19,6 +19,45 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 class AuthController extends AbstractController
 {
     /**
+     * Connexion utilisateur (JWT)
+     */
+    #[Route('/login_check', name: 'login_check', methods: ['POST'])]
+    public function login(
+        Request $request,
+        UserRepository $userRepo,
+        UserPasswordHasherInterface $hasher,
+        JWTTokenManagerInterface $jwtManager
+    ): JsonResponse {
+        $data = json_decode($request->getContent(), true) ?? [];
+        
+        $email = trim($data['email'] ?? '');
+        $password = $data['password'] ?? '';
+
+        if (empty($email) || empty($password)) {
+            return $this->json(['error' => 'Veuillez fournir email et mot de passe.'], Response::HTTP_BAD_REQUEST);
+        }
+
+        $user = $userRepo->findOneBy(['email' => $email]);
+        
+        if (!$user || !$hasher->isPasswordValid($user, $password)) {
+            return $this->json(['error' => 'Identifiants invalides.'], Response::HTTP_UNAUTHORIZED);
+        }
+
+        $token = $jwtManager->create($user);
+
+        return $this->json([
+            'token' => $token,
+            'user' => [
+                'id' => $user->getId(),
+                'email' => $user->getEmail(),
+                'nom' => $user->getNom(),
+                'avatarUrl' => $user->getAvatarUrl(),
+                'dateCreation' => $user->getDateCreation()?->format(\DateTimeInterface::ATOM),
+            ]
+        ]);
+    }
+
+    /**
      * Inscription d'un nouvel utilisateur
      */
     #[Route('/register', name: 'register', methods: ['POST'])]
