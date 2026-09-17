@@ -12,8 +12,7 @@
    - [Tailwind CSS v4](#23-tailwind-css-v4)
    - [Vite 6 & Esbuild](#24-vite-6--esbuild)
    - [Express 4 & Node.js (Architecture Hybride)](#25-express-4--nodejs-architecture-hybride)
-   - [Google GenAI SDK & Gemini 3.8 Flash](#26-google-genai-sdk--gemini-38-flash)
-   - [Motion & Lucide React](#27-motion--lucide-react)
+   - [Motion & Lucide React](#26-motion--lucide-react)
 3. [Patterns de Conception (Design Patterns)](#3-patterns-de-conception-design-patterns)
 4. [Analyse du Schéma de Données & Intégrité](#4-analyse-du-schéma-de-données--intégrité)
 5. [Algorithmes & Fonctionnalités Métier Spécifiques](#5-algorithmes--fonctionnalités-métier-spécifiques)
@@ -30,11 +29,11 @@ Le projet **Mini-Jira** a été conçu pour allier **simplicité d'exécution**,
    Chaque couche logicielle a un rôle strict :
    - Les composants d'interface (`src/components/`) ne traitent aucune logique de stockage bas niveau.
    - Les services (`src/services/`) encapsulent les calculs métier, les vérifications d'autorisation et les déclenchements d'événements.
-   - La couche de données (`mockDatabase.ts`) gère l'intégrité référentielle, le stockage et la conformité au modèle relationnel.
+   - La couche de données gérée par Symfony/Doctrine ORM gère l'intégrité référentielle, le stockage et la conformité au modèle relationnel.
 2. **Architecture Découplée Client/Serveur :**  
-   Pour garantir la sécurité des clés secrètes (comme la clé d'API Gemini), les appels d'intelligence artificielle transitent obligatoirement par un proxy serveur Express (`/api/sprint-plan`), évitant toute exposition de credentials côté navigateur.
+   L'application suit une architecture complète React + Symfony 7 avec communication API REST, garantissant une séparation claire entre frontend et backend.
 3. **Résilience et Mode Déconnecté :**  
-   L'application est conçue pour être 100 % opérationnelle même sans connectivité externe grâce à son mock relationnel complet et son fallback heuristique pour l'IA.
+   L'application est conçue pour être 100 % opérationnelle grâce à son backend Symfony complet et ses algorithmes heuristiques pour la planification de sprint.
 
 ---
 
@@ -76,18 +75,10 @@ Le projet **Mini-Jira** a été conçu pour allier **simplicité d'exécution**,
 - **Pourquoi Express & Node.js ?**  
   Bien que l'application puisse tourner en SPA autonome, l'ajout d'un serveur Express permet de transformer Mini-Jira en une application full-stack moderne.
 - **Rôle dans Mini-Jira :**
-  - **Proxy sécurisé pour l'IA :** Le client React contacte `POST /api/sprint-plan`. Le serveur injecte `process.env.GEMINI_API_KEY` côté backend, protégeant la clé secrète contre l'inspection des outils de développement du navigateur.
+  - **Endpoint de planification de sprint :** Le client React contacte `POST /api/sprint-plan` pour générer des tâches via un algorithme heuristique intelligent.
   - **Serveur de fichiers statiques en production :** En mode production, Express sert les fichiers compilés du dossier `dist/` et gère le fallback SPA sur `index.html`.
 
-### 2.6. Google GenAI SDK (`@google/genai`) & Gemini 3.8 Flash
-- **Pourquoi Gemini 3.8 Flash ?**  
-  Le modèle `gemini-3.8-flash` de Google offre un ratio vitesse/intelligence optimal avec une latence d'inférence extrêmement faible (< 1s) et une excellente compréhension des contraintes méthodologiques logicielles (Scrum, User Stories, découpage technique).
-- **Rôle dans Mini-Jira :**
-  - Transforme un objectif de sprint flou (ex : *"Mettre en place le paiement en ligne"*) en 4 à 6 tâches techniques précises avec titre court, critères d'acceptation, priorité pondérée et temps estimé réaliste en minutes.
-  - Encodage en `responseMimeType: 'application/json'` pour forcer une sortie JSON brute sans fioritures, immédiatement désérialisable sans parser regex complexe.
-  - Présence d'un fallback heuristique si aucune clé n'est configurée, assurant zéro crash en soutenance ou en évaluation hors-ligne.
-
-### 2.7. Motion & Lucide React
+### 2.6. Motion & Lucide React
 - **Motion (`motion/react`) :**  
   Permet d'ajouter des micro-animations naturelles (glissement des cartes du Kanban, apparition douce des modales, indicateur pulsant du chronomètre).
 - **Lucide React :**  

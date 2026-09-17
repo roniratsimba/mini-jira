@@ -89,8 +89,8 @@ Le projet suit une **architecture en couches découplée (Clean Architecture)** 
 └──────────────────────────────┬──────────────────────────────┘
                                │
 ┌──────────────────────────────▼──────────────────────────────┐
-│               SERVEUR PROXY BACKEND (Express / Node)        │
-│          Endpoints REST (/api/sprint-plan) + Gemini SDK     │
+│                    API REST SYMFONY 7                      │
+│          Endpoints REST (/api/auth, /api/projects, etc.)    │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -236,13 +236,6 @@ Le schéma est composé de 7 tables normalisées avec contraintes de clés étra
 ## 🐘 Backend Symfony 7 & PostgreSQL
 
 Le backend Symfony 7 assure la persistance des données et l'authentification via une API REST complète.
-
-### 🧩 Spécifications Techniques Symfony 7
-- **Framework & Version :** Symfony 7.1 avec PHP 8.2+.
-- **Sécurité & Authentification :** JWT Bearer tokens stateless (`LexikJWTAuthenticationBundle`) avec clés RSA 4096 bits.
-- **Contrôle d'Accès RBAC :** Symfony Security Voters (`ProjectVoter`) pour valider les droits `ADMIN` vs `MEMBRE`.
-- **CORS :** `NelmioCorsBundle` préconfiguré pour autoriser le client React sur n'importe quel port.
-- **ORM & BDD :** Doctrine ORM 3 avec PostgreSQL 16 (Entités `User`, `Project`, `ProjectAssignment`, `Task`, `WorkSession`, `Notification`).
 
 ### 🧩 Spécifications Techniques Symfony 7
 - **Framework & Version :** Symfony 7.1 avec PHP 8.2+.
