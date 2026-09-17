@@ -65,25 +65,21 @@ export const projectService = {
     try {
       const projects = await symfonyApi.getProjects();
       return projects.map((project: any) => {
-        const taches = project.tasks || [];
-        const members = project.affectations || [];
-        const total = taches.length;
-        const terminees = taches.filter((t: any) => t.statut === 'TERMINE').length;
-        const pct = total > 0 ? Math.round((terminees / total) * 100) : 0;
-
         return {
           projet: {
             id: project.id,
             nom: project.nom,
             description: project.description,
             dateCreation: project.dateCreation,
-            createurId: project.createurId,
+            createurId: project.createurId, // toujours absent côté backend, voir note ci-dessous
           },
-          role: project.role || 'MEMBRE',
-          totalTaches: total,
-          tachesTerminees: terminees,
-          avancementPct: pct,
-          membresCount: members.length,
+          role: project.currentUserRole || 'MEMBRE',
+          totalTaches: project.totalTasks || 0,
+          tachesTerminees: project.doneTasks || 0,
+          avancementPct: project.totalTasks > 0
+            ? Math.round((project.doneTasks / project.totalTasks) * 100)
+            : 0,
+          membresCount: project.membresCount || 0,
         };
       });
     } catch (error: any) {

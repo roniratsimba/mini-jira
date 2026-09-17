@@ -28,7 +28,26 @@ export const ProjectsList: React.FC<ProjectsListProps> = ({
   onOpenJoinProject,
 }) => {
   const [searchTerm, setSearchTerm] = React.useState('');
-  const projects = projectService.getProjectsForUser(currentUser.id);
+  const [projects, setProjects] = React.useState<ProjectWithRole[]>([]);
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    let cancelled = false;
+
+    projectService.getProjectsForUser(currentUser.id)
+      .then((data) => {
+        if (!cancelled) setProjects(data);
+      })
+      .catch((err) => {
+        console.error('Erreur chargement projets:', err);
+        if (!cancelled) setProjects([]);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => { cancelled = true; };
+  }, [currentUser.id]);
 
   const filteredProjects = projects.filter(
     (p) =>
@@ -36,7 +55,12 @@ export const ProjectsList: React.FC<ProjectsListProps> = ({
       p.projet.description.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  if (loading) {
+    return <div>Chargement des projets...</div>; // ou un spinner
+  }
+
   return (
+    // ... reste du JSX
     <div className="p-8 max-w-7xl mx-auto space-y-6 animate-in fade-in duration-200">
       {/* Top Banner & Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
