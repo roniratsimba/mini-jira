@@ -83,6 +83,11 @@ export default function App() {
 
   // Trigger re-render upon database writes
   const [, setRefreshKey] = useState(0);
+
+  const [currentProject, setCurrentProject] = useState<Projet | null>(null);
+  const [userRole, setUserRole] = useState<'ADMIN' | 'MEMBRE' | null>(null);
+  const [unreadCount, setUnreadCount] = useState(0);
+
   const triggerRefresh = () => setRefreshKey((prev) => prev + 1);
 
   // Subscribe to AuthService and SessionTimerService
@@ -148,10 +153,6 @@ export default function App() {
       />
     );
   }
-
-  const [currentProject, setCurrentProject] = useState<Projet | null>(null);
-  const [userRole, setUserRole] = useState<'ADMIN' | 'MEMBRE' | null>(null);
-  const [unreadCount, setUnreadCount] = useState(0);
 
   const handleSelectProject = (projectId: number) => {
     setSelectedProjectId(projectId);
