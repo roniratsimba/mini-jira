@@ -51,7 +51,7 @@ export default function App() {
   const [currentView, setCurrentView] = useState<
     'projects' | 'project-detail' | 'individual-dashboard' | 'notifications' | 'deliverables' | 'landing' | 'account-settings'
   >('projects');
-  const [selectedProjectId, setSelectedProjectId] = useState<number | null>(1); // Default to project 1
+  const [selectedProjectId, setSelectedProjectId] = useState<number | null>(null);
   const [projectTab, setProjectTab] = useState<
     'dashboard' | 'kanban' | 'members' | 'planner' | 'settings'
   >('dashboard');
@@ -111,12 +111,20 @@ export default function App() {
   // Load project data when selectedProjectId changes
   useEffect(() => {
     if (selectedProjectId && currentUser) {
-      projectService.getProjectById(selectedProjectId).then((project) => {
-        setCurrentProject(project);
-        projectService.getUserRoleInProject(selectedProjectId).then((role) => {
+      projectService.getProjectById(selectedProjectId)
+        .then((project) => {
+          setCurrentProject(project);
+          return projectService.getUserRoleInProject(selectedProjectId);
+        })
+        .then((role) => {
           setUserRole(role);
+        })
+        .catch((err) => {
+          console.error('Erreur chargement projet:', err);
+          setCurrentProject(null);
+          setUserRole(null);
+          setCurrentView('projects'); // ramène vers la liste plutôt que de rester bloqué
         });
-      });
     }
   }, [selectedProjectId, currentUser]);
 
@@ -195,7 +203,7 @@ export default function App() {
     if (window.confirm('Voulez-vous réinitialiser toutes les données de la base à l’état d’origine ?')) {
       // Backend mode - no reset functionality
       sessionTimerService.stopSession();
-      setSelectedProjectId(1);
+      setSelectedProjectId(null);
       setCurrentView('projects');
       triggerRefresh();
     }

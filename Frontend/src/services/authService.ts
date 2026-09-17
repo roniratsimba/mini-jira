@@ -82,14 +82,12 @@ class AuthService {
     }
 
     try {
-      const result = await symfonyApi.login(email, password);
-      if (result.user) {
-        this.currentMembre = result.user;
-        localStorage.setItem(SESSION_KEY, JSON.stringify(result.user));
-        this.notify();
-        return result.user;
-      }
-      throw new Error('Identifiants invalides');
+      const result = await symfonyApi.login(email, password); //stock le token en interne
+      const user = await symfonyApi.getMe();
+      this.currentMembre = user;
+      localStorage.setItem(SESSION_KEY, JSON.stringify(user));
+      this.notify();
+      return user;
     } catch (error: any) {
       throw new Error(error.message || 'Erreur lors de la connexion');
     }
