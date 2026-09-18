@@ -22,20 +22,16 @@ export const JoinProjectModal: React.FC<JoinProjectModalProps> = ({
     setError(null);
 
     if (!token.trim()) {
-      setError('Veuillez renseigner le code d’invitation.');
+      setError('Veuillez renseigner le code d\'invitation.');
       return;
     }
 
     try {
-      await projectService.joinProject(token.trim());
-      // After joining, we need to refresh the projects list
-      const projects = await projectService.getProjectsForUser();
-      if (projects.length > 0) {
-        onProjectJoined(projects[projects.length - 1].projet);
-      }
+      const joinedProject = await projectService.joinProject(token.trim());
+      onProjectJoined(joinedProject);
       onClose();
     } catch (err: any) {
-      setError(err.message || 'Code d’invitation non valide ou expiré.');
+      setError(err.message || 'Code d\'invitation non valide ou expiré.');
     }
   };
 

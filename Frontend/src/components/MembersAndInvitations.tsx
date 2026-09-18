@@ -38,11 +38,11 @@ export const MembersAndInvitations: React.FC<MembersAndInvitationsProps> = ({
     symfonyApi.getProjectDetail(projet.id).then((projectDetail) => {
       if (!isMounted) return;
       if (projectDetail) {
-        if (projectDetail.affectations) {
-          setMembers(projectDetail.affectations);
+        if (projectDetail.membres) {
+          setMembers(projectDetail.membres);
         }
-        if (projectDetail.role) {
-          setUserRole(projectDetail.role);
+        if (projectDetail.currentUserRole) {
+          setUserRole(projectDetail.currentUserRole);
         }
       }
     }).catch((err) => {

@@ -114,7 +114,7 @@ export const projectService = {
   async getUserRoleInProject(projetId: number): Promise<RoleEnum | null> {
     try {
       const project = await symfonyApi.getProjectDetail(projetId);
-      return project.role || null;
+      return project.currentUserRole || null;
     } catch (error: any) {
       throw new Error(error.message || 'Erreur lors de la récupération du rôle');
     }
@@ -232,9 +232,16 @@ export const projectService = {
    * Rejoint un projet via un code d'invitation.
    * @param code Code d'invitation
    */
-  async joinProject(code: string) {
+  async joinProject(code: string): Promise<Projet> {
     try {
-      await symfonyApi.joinProject(code);
+      const result = await symfonyApi.joinProject(code);
+      return {
+        id: result.project.id,
+        nom: result.project.nom,
+        description: result.project.description,
+        dateCreation: result.project.dateCreation,
+        createurId: result.project.createurId,
+      };
     } catch (error: any) {
       throw new Error(error.message || 'Erreur lors de la jointure au projet');
     }
