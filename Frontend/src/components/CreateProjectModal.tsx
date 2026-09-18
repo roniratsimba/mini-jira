@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { X, FolderPlus, AlertCircle } from 'lucide-react';
 import { Membre, Projet } from '../types';
 import { projectService } from '../services/projectService';
-
+import { generateProjectCode } from '../utils/projectCode';
 interface CreateProjectModalProps {
   currentUser: Membre;
   onClose: () => void;
@@ -17,8 +17,9 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
   const [nom, setNom] = useState('');
   const [description, setDescription] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [code, setCode] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
 
@@ -28,14 +29,14 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
     }
 
     try {
-      const proj = projectService.createProject(nom.trim(), description.trim(), currentUser.id);
+      const code = generateProjectCode(nom.trim()); // ex: "REFONTE-DASH-X7K2"
+      const proj = await projectService.createProject(nom.trim(), description.trim(), code);
       onProjectCreated(proj);
       onClose();
     } catch (err: any) {
       setError(err.message || 'Erreur lors de la création du projet.');
     }
   };
-
   return (
     <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-150">
       <div className="bg-white w-full max-w-md rounded-2xl border border-slate-200 shadow-xl overflow-hidden">
