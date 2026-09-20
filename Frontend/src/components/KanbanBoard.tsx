@@ -9,7 +9,7 @@
  * - Prise en charge des alertes de retard et intégration directe du chronomètre
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Plus, Search, Filter, Clock, CheckCircle2, CircleDashed, PlayCircle } from 'lucide-react';
 import { Projet, Statut, Priorite, Tache, Membre } from '../types';
 import { taskService } from '../services/taskService';
@@ -76,9 +76,25 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [priorityFilter, setPriorityFilter] = useState<Priorite | 'ALL'>('ALL');
   const [dragOverColumn, setDragOverColumn] = useState<Statut | null>(null);
+  const [allTasks, setAllTasks] = useState<Tache[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const allTasks = taskService.getTasksForProject(projet.id);
-
+ useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    taskService.getTasksForProject(projet.id)
+      .then((tasks) => {
+        if (!cancelled) setAllTasks(tasks);
+      })
+      .catch((err) => {
+        console.error('Erreur chargement tâches:', err);
+        if (!cancelled) setAllTasks([]);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => { cancelled = true; };
+  }, [projet.id]);
   // Filter tasks
   const filteredTasks = allTasks.filter((t) => {
     if (initialFilter === 'RETARD') {
@@ -87,7 +103,9 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
       // If clicked from dashboard status button
       // Allow user to reset or view
     }
-
+    if (loading) {
+      return <div className="p-8 text-center text-slate-400 text-sm">Chargement des tâches...</div>;
+    }
     if (priorityFilter !== 'ALL' && t.priorite !== priorityFilter) {
       return false;
     }

@@ -27,13 +27,13 @@ export const JoinProjectModal: React.FC<JoinProjectModalProps> = ({
     }
 
     try {
-      console.log('1. Avant appel joinProject');
+      // console.log('1. Avant appel joinProject');
       const joinedProject = await projectService.joinProject(token.trim());
-      console.log('2. Projet rejoint reçu:', joinedProject);
+      // console.log('2. Projet rejoint reçu:', joinedProject);
       onProjectJoined(joinedProject);
-      console.log('3. onProjectJoined appelé');
+      // console.log('3. onProjectJoined appelé');
       onClose();
-      console.log('4. onClose appelé');
+      // console.log('4. onClose appelé');
     } catch (err: any) {
       console.log('ERREUR CATCHÉE:', err);
       setError(err.message || 'Code d\'invitation non valide ou expiré.');

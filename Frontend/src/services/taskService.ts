@@ -45,10 +45,10 @@ export const taskService = {
         priorite: task.priorite,
         statut: task.statut,
         tempsEstime: task.tempsEstime,
-        tempsReel: task.totalMinutesPassees || 0,
+        tempsReel: task.tempsPasse || 0,
         dateCreation: task.dateCreation,
         dateEcheance: task.dateEcheance,
-        membreAssigneId: task.assignees?.[0]?.id || null,
+        membreAssigneId: task.assignes?.[0]?.id || null,
       }));
     } catch (error: any) {
       throw new Error(error.message || 'Erreur lors de la récupération des tâches');
@@ -74,7 +74,7 @@ export const taskService = {
       for (const project of projects) {
         const tasks = await symfonyApi.getTasks(project.id);
         const filteredTasks = tasks
-          .filter((task: any) => task.assignees?.some((assignee: any) => assignee.id === membreId))
+          .filter((task: any) => task.assignes?.some((assignee: any) => assignee.id === membreId))
           .map((task: any) => ({
             id: task.id,
             projetId: task.projetId,
@@ -83,7 +83,7 @@ export const taskService = {
             priorite: task.priorite,
             statut: task.statut,
             tempsEstime: task.tempsEstime,
-            tempsReel: task.totalMinutesPassees || 0,
+            tempsReel: task.tempsPasse || 0,
             dateCreation: task.dateCreation,
             dateEcheance: task.dateEcheance,
             membreAssigneId: membreId,
@@ -152,10 +152,10 @@ export const taskService = {
             priorite: task.priorite,
             statut: task.statut,
             tempsEstime: task.tempsEstime,
-            tempsReel: task.totalMinutesPassees || 0,
+            tempsReel: task.tempsPasse || 0,
             dateCreation: task.dateCreation,
             dateEcheance: task.dateEcheance,
-            membreAssigneId: task.assignees?.[0]?.id || null,
+            membreAssigneId: task.assignes?.[0]?.id || null,
           };
         }
       }
@@ -177,6 +177,7 @@ export const taskService = {
     priorite?: string;
     statut?: string;
     tempsEstime?: number;
+    dateEcheance?: string;
     assigneIds?: number[];
   }): Promise<Tache> {
     if (!data.titre.trim()) {
@@ -193,10 +194,10 @@ export const taskService = {
         priorite: task.priorite,
         statut: task.statut,
         tempsEstime: task.tempsEstime,
-        tempsReel: task.totalMinutesPassees || 0,
+        tempsReel: task.tempsPasse || 0,
         dateCreation: task.dateCreation,
         dateEcheance: task.dateEcheance,
-        membreAssigneId: task.assignees?.[0]?.id || null,
+        membreAssigneId: task.assignes?.[0]?.id || null,
       };
     } catch (error: any) {
       throw new Error(error.message || 'Erreur lors de la création de la tâche');

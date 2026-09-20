@@ -62,6 +62,7 @@ class TaskController extends AbstractController
                 'statut' => $t->getStatut(),
                 'tempsEstime' => $t->getTempsEstime(),
                 'tempsPasse' => $t->getTotalMinutesPassees(),
+                'dateEcheance' => $t->getDateEcheance()?->format('Y-m-d'), 
                 'dateCreation' => $t->getDateCreation()?->format(\DateTimeInterface::ATOM),
                 'assignes' => $assignees,
             ];
@@ -106,6 +107,13 @@ class TaskController extends AbstractController
         $task->setStatut($data['statut'] ?? Task::STATUS_TODO);
         $task->setTempsEstime((int) ($data['tempsEstime'] ?? 0));
 
+        if (!empty($data['dateEcheance'])) {
+            try {
+                $task->setDateEcheance(new \DateTime($data['dateEcheance']));
+            } catch (\Exception $e) {
+                return $this->json(['error' => 'Format de date d\'échéance invalide.'], Response::HTTP_BAD_REQUEST);
+            }
+        }
         // Assignations initiales
         if (!empty($data['assigneIds']) && is_array($data['assigneIds'])) {
             foreach ($data['assigneIds'] as $uid) {
@@ -126,6 +134,7 @@ class TaskController extends AbstractController
             'statut' => $task->getStatut(),
             'priorite' => $task->getPriorite(),
             'tempsEstime' => $task->getTempsEstime(),
+            'dateEcheance' => $task->getDateEcheance()?->format('Y-m-d'), 
         ], Response::HTTP_CREATED);
     }
 

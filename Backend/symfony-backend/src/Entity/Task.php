@@ -24,7 +24,7 @@ class Task
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column]
+    #[ORM\Column]   
     #[Groups(['task:read'])]
     private ?int $id = null;
 
@@ -53,6 +53,10 @@ class Task
     #[ORM\Column(type: Types::INTEGER)]
     #[Groups(['task:read', 'task:write'])]
     private int $tempsEstime = 0; // Durée en minutes
+
+    #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
+    #[Groups(['task:read', 'task:write'])]
+    private ?\DateTimeInterface $dateEcheance = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     #[Groups(['task:read'])]
@@ -154,6 +158,17 @@ class Task
     public function setTempsEstime(int $tempsEstime): static
     {
         $this->tempsEstime = $tempsEstime;
+        return $this;
+    }
+
+    public function getDateEcheance(): ?\DateTimeInterface
+    {
+        return $this->dateEcheance;
+    }
+
+    public function setDateEcheance(?\DateTimeInterface $dateEcheance): static
+    {
+        $this->dateEcheance = $dateEcheance;
         return $this;
     }
 

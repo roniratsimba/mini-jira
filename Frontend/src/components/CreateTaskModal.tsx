@@ -3,6 +3,7 @@ import { X, Plus, AlertCircle } from 'lucide-react';
 import { Projet, Statut, Priorite, Tache, Membre } from '../types';
 import { taskService } from '../services/taskService';
 import { projectService } from '../services/projectService';
+import { symfonyApi } from '../services/symfonyApiClient';
 
 interface CreateTaskModalProps {
   projet: Projet;
@@ -32,14 +33,15 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
   const [projectMembers, setProjectMembers] = useState<any[]>([]);
 
   useEffect(() => {
-    projectService.getProjectDetailedStats(projet.id).then(() => {
-      // We'll need to get the members from the project detail
-      projectService.getProjectById(projet.id).then((project) => {
-        // For now, we'll use the current user as available member
-        setProjectMembers([{ id: currentUser.id, nom: currentUser.nom }]);
-      });
-    });
-  }, [projet.id, currentUser.id]);
+    let cancelled = false;
+    projectService.getProjectById(projet.id); // optionnel si tu n'as pas besoin du retour ici
+    symfonyApi.getProjectDetail(projet.id).then((detail) => {
+      if (!cancelled && detail.membres) {
+        setProjectMembers(detail.membres); // [{ id, nom, email, avatarUrl, role, dateAffectation }, ...]
+      }
+    }).catch((err) => console.error('Erreur chargement membres:', err));
+    return () => { cancelled = true; };
+  }, [projet.id]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,6 +59,7 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
         priorite,
         statut,
         tempsEstime: Number(tempsEstime) || 0,
+        dateEcheance,
         assigneIds: membreAssigneId ? [membreAssigneId] : [],
       });
 
@@ -155,11 +158,11 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
                 className="w-full text-xs font-medium px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 outline-hidden focus:border-indigo-500"
               >
                 <option value="">-- Non assigné --</option>
-                {projectMembers.map(({ membre, affectation }) => (
-                  <option key={membre.id} value={membre.id}>
-                    {membre.nom} ({affectation.role})
-                  </option>
-                ))}
+                  {projectMembers.map((m) => (
+                    <option key={m.id} value={m.id}>
+                      {m.nom} ({m.role})
+                    </option>
+                  ))}
               </select>
             </div>
 
