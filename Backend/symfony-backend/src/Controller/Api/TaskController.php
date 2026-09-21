@@ -174,6 +174,33 @@ class TaskController extends AbstractController
         ]);
     }
 
+    #[Route('/tasks/{id}/sessions', name: 'sessions', methods: ['GET'])]
+    public function sessions(int $id, #[CurrentUser] ?User $user, TaskRepository $taskRepo): JsonResponse
+    {
+        if (!$user) {
+            return $this->json(['error' => 'Non authentifié.'], Response::HTTP_UNAUTHORIZED);
+        }
+
+        $task = $taskRepo->find($id);
+        if (!$task) {
+            return $this->json(['error' => 'Tâche introuvable.'], Response::HTTP_NOT_FOUND);
+        }
+
+        $data = [];
+        foreach ($task->getWorkSessions() as $session) {
+            $data[] = [
+                'id' => $session->getId(),
+                'tacheId' => $task->getId(),
+                'membreId' => $session->getUser()?->getId(),
+                'dateDebut' => $session->getDebut()?->format(\DateTimeInterface::ATOM),
+                'dateFin' => $session->getFin()?->format(\DateTimeInterface::ATOM),
+                'dureeMinutes' => $session->getDureeMinutes(),
+            ];
+        }
+
+        return $this->json($data);
+    }
+
     /**
      * Suppression d'une tâche
      */
@@ -197,5 +224,59 @@ class TaskController extends AbstractController
         $em->flush();
 
         return $this->json(['message' => 'Tâche supprimée avec succès.']);
+    }
+    #[Route('/tasks/{id}', name: 'update', methods: ['PATCH'])]
+    public function update(
+        int $id,
+        Request $request,
+        #[CurrentUser] ?User $user,
+        TaskRepository $taskRepo,
+        UserRepository $userRepo,
+        EntityManagerInterface $em
+    ): JsonResponse {
+        if (!$user) {
+            return $this->json(['error' => 'Non authentifié.'], Response::HTTP_UNAUTHORIZED);
+        }
+
+        $task = $taskRepo->find($id);
+        if (!$task) {
+            return $this->json(['error' => 'Tâche introuvable.'], Response::HTTP_NOT_FOUND);
+        }
+
+        $data = json_decode($request->getContent(), true) ?? [];
+
+        if (array_key_exists('titre', $data) && trim($data['titre']) !== '') {
+            $task->setTitre(trim($data['titre']));
+        }
+        if (array_key_exists('description', $data)) {
+            $task->setDescription($data['description']);
+        }
+        if (array_key_exists('priorite', $data)) {
+            $task->setPriorite($data['priorite']);
+        }
+        if (array_key_exists('statut', $data)) {
+            $task->setStatut($data['statut']);
+        }
+        if (array_key_exists('tempsEstime', $data)) {
+            $task->setTempsEstime((int) $data['tempsEstime']);
+        }
+        if (array_key_exists('dateEcheance', $data)) {
+            $task->setDateEcheance($data['dateEcheance'] ? new \DateTime($data['dateEcheance']) : null);
+        }
+        if (array_key_exists('membreAssigneId', $data)) {
+            foreach ($task->getAssignees() as $existing) {
+                $task->removeAssignee($existing);
+            }
+            if ($data['membreAssigneId']) {
+                $assignee = $userRepo->find($data['membreAssigneId']);
+                if ($assignee) {
+                    $task->addAssignee($assignee);
+                }
+            }
+        }
+
+        $em->flush();
+
+        return $this->json(['id' => $task->getId(), 'message' => 'Tâche mise à jour avec succès.']);
     }
 }

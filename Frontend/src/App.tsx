@@ -189,9 +189,13 @@ export default function App() {
     triggerRefresh();
   };
 
-  const handleUpdateTask = (taskId: number, updates: Partial<Tache>) => {
-    taskService.updateTask(taskId, updates, currentUser.id);
-    triggerRefresh();
+  const handleUpdateTask = async (taskId: number, updates: Partial<Tache>) => {
+    try {
+      await taskService.updateTask(taskId, updates); 
+      triggerRefresh();
+    } catch (err: any) {
+      console.error('Erreur mise à jour tâche:', err);
+    }
   };
 
   const handleDeleteTask = (taskId: number) => {

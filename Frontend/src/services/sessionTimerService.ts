@@ -58,7 +58,7 @@ class SessionTimerService {
         // Vérifier si la session est toujours active sur le serveur
         try {
           const serverSession = await symfonyApi.getActiveSession();
-          if (!serverSession || serverSession.taskId !== parsed.tacheId) {
+          if (!serverSession || serverSession.tacheId !== parsed.tacheId) {
             // La session n'existe plus sur le serveur, on la réinitialise
             this.activeSession = null;
             this.elapsedSeconds = 0;
@@ -202,28 +202,19 @@ class SessionTimerService {
   /** Récupère l'historique de toutes les sessions de travail enregistrées pour une tâche */
   public async getSessionsForTask(tacheId: number): Promise<SessionTravail[]> {
     try {
-      // On récupère les détails de la tâche qui contient les sessions
-      const projects = await symfonyApi.getProjects();
-      for (const project of projects) {
-        const tasks = await symfonyApi.getTasks(project.id);
-        const task = tasks.find((t: any) => t.id === tacheId);
-        if (task && task.workSessions) {
-          return task.workSessions.map((session: any) => ({
-            id: session.id,
-            tacheId: session.taskId,
-            membreId: session.userId,
-            dateDebut: session.debut,
-            dateFin: session.fin,
-            dureeMinutes: session.dureeMinutes,
-          }));
-        }
-      }
-      return [];
+      const sessions = await symfonyApi.request<any[]>(`/tasks/${tacheId}/sessions`);
+      return (sessions || []).map((s: any) => ({
+        id: s.id,
+        tacheId: s.tacheId,
+        membreId: s.membreId,
+        dateDebut: s.dateDebut,
+        dateFin: s.dateFin,
+        dureeMinutes: s.dureeMinutes,
+      }));
     } catch (error: any) {
       throw new Error(error.message || 'Erreur lors de la récupération des sessions');
     }
   }
-
   /**
    * Formate un nombre total de secondes en affichage lisible HH:MM:SS ou MM:SS.
    * @param totalSeconds Secondes écoulées

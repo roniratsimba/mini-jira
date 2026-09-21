@@ -100,15 +100,15 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
       }).catch(() => {});
 
       symfonyApi.getProjectDetail(t.projetId).then((detail) => {
-        if (isMounted && detail?.affectations) {
-          setProjectMembers(detail.affectations);
+        if (isMounted && detail?.membres) {
+          setProjectMembers(detail.membres); // [{ id, nom, email, avatarUrl, role, dateAffectation }, ...]
         }
       }).catch(() => {});
     }).catch(() => {});
 
     // Charger les sessions via l'API Symfony si endpoint disponible
-    symfonyApi.request<any[]>(`/tasks/${taskId}/sessions`).then((sList) => {
-      if (isMounted && Array.isArray(sList)) {
+    sessionTimerService.getSessionsForTask(taskId).then((sList) => {
+      if (isMounted ) {
         setSessions(sList);
       }
     }).catch(() => {
