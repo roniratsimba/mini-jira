@@ -126,11 +126,11 @@ export const IndividualDashboard: React.FC<IndividualDashboardProps> = ({
               className="w-full text-xs font-medium px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 outline-hidden focus:border-indigo-500"
             >
               <option value="ALL">Tous les projets</option>
-              {myProjects.map(({ projet }) => (
-                <option key={projet.id} value={projet.id}>
-                  {projet.nom}
-                </option>
-              ))}
+                {myProjects.map((projet) => (
+                  <option key={projet.id} value={projet.id}>
+                    {projet.nom}
+                  </option>
+                ))}
             </select>
           </div>
 
